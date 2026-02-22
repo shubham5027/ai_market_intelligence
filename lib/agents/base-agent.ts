@@ -11,6 +11,7 @@ export interface AgentConfig {
 export interface AgentExecutionContext {
   competitorId?: string;
   parameters?: Record<string, any>;
+  companyContext?: string; // Internal company context for SWOT analysis
   timestamp: Date;
 }
 

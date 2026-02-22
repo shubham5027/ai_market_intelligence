@@ -1,6 +1,7 @@
 import { BaseAgent, AgentExecutionContext, AgentResult } from './base-agent';
 import { supabase } from '@/lib/supabase';
 import { callOpenRouter } from '@/lib/llm-client';
+import { tavilySearch } from '@/lib/tavily-agent';
 
 export class MarketShiftAgent extends BaseAgent {
   constructor() {
@@ -127,7 +128,7 @@ Analyze and identify market shifts in this format:
   }
 
   private async gatherMarketData(): Promise<any> {
-    const [competitors, recentPricing, recentProducts, recentNews] = await Promise.all([
+    const [competitors, recentPricing, recentProducts, recentNews, externalTrends] = await Promise.all([
       supabase.from('competitors').select('*').eq('status', 'active'),
       supabase
         .from('price_monitoring')
@@ -144,6 +145,8 @@ Analyze and identify market shifts in this format:
         .select('*')
         .order('collected_at', { ascending: false })
         .limit(50),
+      // Fetch external market trends via Tavily
+      this.fetchExternalTrends(),
     ]);
 
     return {
@@ -151,7 +154,33 @@ Analyze and identify market shifts in this format:
       pricingTrends: this.analyzePricingTrends(recentPricing.data || []),
       productTrends: this.analyzeProductTrends(recentProducts.data || []),
       newsSentiment: this.analyzeNewsSentiment(recentNews.data || []),
+      externalTrends,
     };
+  }
+
+  private async fetchExternalTrends(): Promise<any> {
+    try {
+      const queries = [
+        'SaaS market trends 2026',
+        'enterprise technology shifts',
+        'B2B software market outlook',
+      ];
+      
+      const results = await Promise.all(
+        queries.map(q => tavilySearch(q, { maxResults: 3, includeAnswer: true }))
+      );
+      
+      return {
+        marketTrends: results[0]?.answer || null,
+        technologyShifts: results[1]?.answer || null,
+        marketOutlook: results[2]?.answer || null,
+        topSources: results.flatMap(r => r.results?.slice(0, 2) || [])
+          .map(s => ({ title: s.title, url: s.url, snippet: s.content?.substring(0, 200) })),
+      };
+    } catch (error) {
+      console.error('Failed to fetch external trends:', error);
+      return null;
+    }
   }
 
   private analyzePricingTrends(prices: any[]): any {

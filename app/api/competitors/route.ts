@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { getSupabase, isSupabaseConfigured } from '@/lib/supabase';
 
 export async function GET(request: NextRequest) {
   try {
+    if (!isSupabaseConfigured()) {
+      return NextResponse.json(
+        { error: 'Supabase is not configured. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your .env file.' },
+        { status: 503 }
+      );
+    }
+    const supabase = getSupabase();
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
 
@@ -26,6 +33,13 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    if (!isSupabaseConfigured()) {
+      return NextResponse.json(
+        { error: 'Supabase is not configured' },
+        { status: 503 }
+      );
+    }
+    const supabase = getSupabase();
     const body = await request.json();
     const { name, industry, website, description } = body;
 

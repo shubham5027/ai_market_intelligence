@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ExecutiveReportAgent } from '@/lib/agents/executive-report-agent';
-import { supabase } from '@/lib/supabase';
+import { getSupabase, isSupabaseConfigured } from '@/lib/supabase';
 
 export const maxDuration = 300;
 
 export async function GET(request: NextRequest) {
   try {
+    if (!isSupabaseConfigured()) {
+      return NextResponse.json({ error: 'Supabase is not configured' }, { status: 503 });
+    }
+    const supabase = getSupabase();
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '10');
 

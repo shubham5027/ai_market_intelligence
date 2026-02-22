@@ -131,28 +131,33 @@ export async function scrapeTavily(query: string): Promise<any> {
   const apiKey = process.env.TAVILY_API_KEY;
 
   if (!apiKey) {
-    throw new Error('TAVILY_API_KEY is not configured');
+    console.error('TAVILY_API_KEY is not configured');
+    return [];
   }
 
   try {
     const response = await axios.post(
       'https://api.tavily.com/search',
       {
+        api_key: apiKey,
         query,
         search_depth: 'advanced',
-        max_results: 5,
+        include_answer: false,
+        include_raw_content: false,
+        max_results: 10,
       },
       {
         headers: {
           'Content-Type': 'application/json',
-          'X-API-Key': apiKey,
         },
+        timeout: 30000,
       }
     );
 
+    console.log('Tavily response:', JSON.stringify(response.data, null, 2));
     return response.data.results || [];
   } catch (error: any) {
-    console.error('Tavily API error:', error.message);
+    console.error('Tavily API error:', error.response?.data || error.message);
     return [];
   }
 }

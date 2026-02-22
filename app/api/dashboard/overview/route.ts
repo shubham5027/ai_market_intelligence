@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { getSupabase, isSupabaseConfigured } from '@/lib/supabase';
 
 export async function GET(request: NextRequest) {
   try {
+    if (!isSupabaseConfigured()) {
+      return NextResponse.json({ error: 'Supabase is not configured' }, { status: 503 });
+    }
+    const supabase = getSupabase();
     const last7Days = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
     const last24Hours = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
