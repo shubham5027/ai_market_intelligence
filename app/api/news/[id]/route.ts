@@ -4,7 +4,7 @@ import { getSupabase, isSupabaseConfigured } from '@/lib/supabase';
 // GET single news article
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!isSupabaseConfigured()) {
@@ -13,6 +13,7 @@ export async function GET(
         { status: 503 }
       );
     }
+    const { id } = await params;
     const supabase = getSupabase();
     const { data, error } = await supabase
       .from('news_articles')
@@ -25,7 +26,7 @@ export async function GET(
           website
         )
       `)
-      .eq('id', params.id)
+      .eq('id', id)
       .maybeSingle();
 
     if (error) {
@@ -45,16 +46,17 @@ export async function GET(
 // PUT - Update news article
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!isSupabaseConfigured()) {
       return NextResponse.json({ error: 'Supabase is not configured' }, { status: 503 });
     }
+    const { id } = await params;
     const supabase = getSupabase();
     const body = await request.json();
-    const { 
-      title, 
+    const {
+      title,
       content,
       summary,
       source,
@@ -73,7 +75,7 @@ export async function PUT(
     const { data, error } = await supabase
       .from('news_articles')
       .update(updateData)
-      .eq('id', params.id)
+      .eq('id', id)
       .select(`
         *,
         competitors (
@@ -101,17 +103,18 @@ export async function PUT(
 // DELETE - Remove news article
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!isSupabaseConfigured()) {
       return NextResponse.json({ error: 'Supabase is not configured' }, { status: 503 });
     }
+    const { id } = await params;
     const supabase = getSupabase();
     const { error } = await supabase
       .from('news_articles')
       .delete()
-      .eq('id', params.id);
+      .eq('id', id);
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });

@@ -4,12 +4,13 @@ import { getSupabase, isSupabaseConfigured } from '@/lib/supabase';
 // GET single price record
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!isSupabaseConfigured()) {
       return NextResponse.json({ error: 'Supabase is not configured' }, { status: 503 });
     }
+    const { id } = await params;
     const supabase = getSupabase();
     const { data, error } = await supabase
       .from('price_monitoring')
@@ -22,7 +23,7 @@ export async function GET(
           website
         )
       `)
-      .eq('id', params.id)
+      .eq('id', id)
       .maybeSingle();
 
     if (error) {
@@ -42,21 +43,22 @@ export async function GET(
 // PUT - Update price record
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!isSupabaseConfigured()) {
       return NextResponse.json({ error: 'Supabase is not configured' }, { status: 503 });
     }
+    const { id } = await params;
     const supabase = getSupabase();
     const body = await request.json();
-    const { 
-      product_name, 
-      product_sku, 
-      price, 
+    const {
+      product_name,
+      product_sku,
+      price,
       currency,
       url,
-      metadata 
+      metadata
     } = body;
 
     const updateData: any = {};
@@ -70,7 +72,7 @@ export async function PUT(
     const { data, error } = await supabase
       .from('price_monitoring')
       .update(updateData)
-      .eq('id', params.id)
+      .eq('id', id)
       .select(`
         *,
         competitors (
@@ -98,17 +100,18 @@ export async function PUT(
 // DELETE - Remove price record
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!isSupabaseConfigured()) {
       return NextResponse.json({ error: 'Supabase is not configured' }, { status: 503 });
     }
+    const { id } = await params;
     const supabase = getSupabase();
     const { error } = await supabase
       .from('price_monitoring')
       .delete()
-      .eq('id', params.id);
+      .eq('id', id);
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });

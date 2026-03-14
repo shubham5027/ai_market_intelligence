@@ -1,5 +1,5 @@
 import { BaseAgent, AgentExecutionContext, AgentResult } from './base-agent';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 import { callOpenRouter } from '@/lib/llm-client';
 import { searchNews } from '@/lib/news-api';
 
@@ -24,6 +24,7 @@ export class NewsAggregationAgent extends BaseAgent {
         throw new Error('Competitor ID is required');
       }
 
+      const supabase = getSupabase();
       const { data: competitor } = await supabase
         .from('competitors')
         .select('*')

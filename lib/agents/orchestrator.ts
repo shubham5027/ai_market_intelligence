@@ -5,7 +5,7 @@ import { NewsAggregationAgent } from './news-aggregation-agent';
 import { SWOTAnalysisAgent } from './swot-analysis-agent';
 import { MarketShiftAgent } from './market-shift-agent';
 import { AnomalyDetectionAgent } from './anomaly-detection-agent';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 
 export interface OrchestrationPlan {
   agents: string[];
@@ -113,7 +113,7 @@ export class AgentOrchestrator {
   }
 
   async executeCompetitorMonitoring(): Promise<void> {
-    const { data: competitors } = await supabase
+    const { data: competitors } = await getSupabase()
       .from('competitors')
       .select('*')
       .eq('status', 'active');

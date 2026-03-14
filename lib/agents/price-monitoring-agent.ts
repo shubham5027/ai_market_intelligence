@@ -1,5 +1,5 @@
 import { BaseAgent, AgentExecutionContext, AgentResult } from './base-agent';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 import { callOpenRouter } from '@/lib/llm-client';
 import { scrapeWebsite } from '@/lib/scraper';
 
@@ -24,6 +24,7 @@ export class PriceMonitoringAgent extends BaseAgent {
         throw new Error('Competitor ID is required');
       }
 
+      const supabase = getSupabase();
       const { data: competitor } = await supabase
         .from('competitors')
         .select('*')
@@ -137,7 +138,7 @@ Analyze and return pricing information in this format:
   }
 
   private async getPreviousPrices(competitorId: string): Promise<any[]> {
-    const { data } = await supabase
+    const { data } = await getSupabase()
       .from('price_monitoring')
       .select('*')
       .eq('competitor_id', competitorId)

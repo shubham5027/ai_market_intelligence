@@ -152,9 +152,9 @@ async function handleNewsIntelligence(params: {
   if (saveToDb && isSupabaseConfigured() && result.articles.length > 0) {
     try {
       const supabase = getSupabase();
-      
+
       // Get competitor ID if provided
-      let competitorId = null;
+      let competitorId: string | null = null;
       if (competitor) {
         const { data: compData } = await supabase
           .from('competitors')
@@ -172,8 +172,8 @@ async function handleNewsIntelligence(params: {
         summary: article.content.substring(0, 200),
         source: new URL(article.url).hostname,
         url: article.url,
-        sentiment_score: result.sentiment === 'positive' ? 0.5 : 
-                        result.sentiment === 'negative' ? -0.5 : 0,
+        sentiment_score: result.sentiment === 'positive' ? 0.5 :
+          result.sentiment === 'negative' ? -0.5 : 0,
         published_at: article.publishedDate || new Date().toISOString(),
         collected_at: new Date().toISOString(),
       }));
@@ -240,7 +240,7 @@ async function handleCompetitorIntelligence(params: {
       // Save news articles
       if (result.news?.length > 0 && competitor) {
         const articles = result.news.slice(0, 10).map((article) => ({
-          competitor_id: competitor.id,
+          competitor_id: competitor!.id,
           title: article.title,
           content: article.content,
           summary: article.content.substring(0, 200),
@@ -387,7 +387,7 @@ async function handleSummarizeNews(params: {
       maxResults: 10,
       includeAnswer: true,
     });
-    
+
     articlesToSummarize = searchResult.results.map((r) => ({
       title: r.title,
       content: r.content,

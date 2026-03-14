@@ -1,5 +1,5 @@
 import { BaseAgent, AgentExecutionContext, AgentResult } from './base-agent';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 import { callOpenRouter } from '@/lib/llm-client';
 
 export class AnomalyDetectionAgent extends BaseAgent {
@@ -67,6 +67,7 @@ Identify anomalies and return in this format:
 
       const anomaliesData = JSON.parse(analysis);
 
+      const supabase = getSupabase();
       for (const anomaly of anomaliesData.anomalies) {
         await supabase.from('anomaly_detections').insert({
           anomaly_type: anomaly.type,
@@ -132,6 +133,7 @@ Identify anomalies and return in this format:
     const last7Days = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
     const last30Days = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
+    const supabase = getSupabase();
     const [recentPricing, historicalPricing, recentProducts, recentNews] = await Promise.all([
       supabase
         .from('price_monitoring')

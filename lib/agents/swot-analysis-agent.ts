@@ -1,5 +1,5 @@
 import { BaseAgent, AgentExecutionContext, AgentResult } from './base-agent';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 import { callOpenRouter } from '@/lib/llm-client';
 
 // Type definitions for structured SWOT output
@@ -115,6 +115,7 @@ export class SWOTAnalysisAgent extends BaseAgent {
         throw new Error('Competitor ID is required');
       }
 
+      const supabase = getSupabase();
       const { data: competitor } = await supabase
         .from('competitors')
         .select('*')
@@ -127,7 +128,7 @@ export class SWOTAnalysisAgent extends BaseAgent {
 
       // Gather all structured data inputs
       const structuredData = await this.gatherStructuredData(competitorId);
-      
+
       // Build analysis period string
       const analysisPeriod = this.getAnalysisPeriod(structuredData);
 
@@ -269,44 +270,45 @@ ${companyContext || 'No internal company context provided. Analyze from general 
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
     const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
 
+    const db = getSupabase();
     const [prices, products, news, marketShifts, anomalies] = await Promise.all([
       // Price monitoring data
-      supabase
+      db
         .from('price_monitoring')
         .select('product_name, old_price, new_price, change_percentage, currency, detected_at')
         .eq('competitor_id', competitorId)
         .gte('detected_at', ninetyDaysAgo)
         .order('detected_at', { ascending: false })
         .limit(50),
-      
+
       // Product changes
-      supabase
+      db
         .from('product_changes')
         .select('change_type, title, description, significance, detected_at')
         .eq('competitor_id', competitorId)
         .gte('detected_at', ninetyDaysAgo)
         .order('detected_at', { ascending: false })
         .limit(30),
-      
+
       // News and sentiment data
-      supabase
+      db
         .from('news_articles')
         .select('title, summary, source, sentiment_score, relevance_score, collected_at')
         .eq('competitor_id', competitorId)
         .gte('collected_at', thirtyDaysAgo)
         .order('collected_at', { ascending: false })
         .limit(20),
-      
+
       // Market shifts
-      supabase
+      db
         .from('market_shifts')
         .select('shift_type, description, impact_level, confidence_score, detected_at')
         .gte('detected_at', ninetyDaysAgo)
         .order('detected_at', { ascending: false })
         .limit(15),
-      
+
       // Anomaly detections
-      supabase
+      db
         .from('anomaly_detections')
         .select('anomaly_type, description, severity, data_source, detected_at')
         .eq('competitor_id', competitorId)
@@ -445,13 +447,13 @@ ${companyContext || 'No internal company context provided. Analyze from general 
     return insights.map((insight) => ({
       title: insight.title || 'Untitled',
       description: insight.description || '',
-      supporting_evidence: Array.isArray(insight.supporting_evidence) 
-        ? insight.supporting_evidence 
+      supporting_evidence: Array.isArray(insight.supporting_evidence)
+        ? insight.supporting_evidence
         : [insight.supporting_evidence || 'No evidence provided'],
       impact_score: Math.min(100, Math.max(0, Number(insight.impact_score) || 50)),
       confidence_score: Math.min(1, Math.max(0, Number(insight.confidence_score) || 0.5)),
-      time_horizon: ['short_term', 'mid_term', 'long_term'].includes(insight.time_horizon) 
-        ? insight.time_horizon 
+      time_horizon: ['short_term', 'mid_term', 'long_term'].includes(insight.time_horizon)
+        ? insight.time_horizon
         : 'mid_term',
     }));
   }
@@ -484,7 +486,7 @@ ${companyContext || 'No internal company context provided. Analyze from general 
     const hasAnomalies = data.anomalies?.length > 0;
 
     const completeness = [hasPrice, hasProduct, hasNews, hasMarket, hasAnomalies].filter(Boolean).length;
-    
+
     if (completeness >= 4) return 'high';
     if (completeness >= 2) return 'moderate';
     return 'low';

@@ -1,5 +1,5 @@
 import { BaseAgent, AgentExecutionContext, AgentResult } from './base-agent';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 import { callOpenRouter } from '@/lib/llm-client';
 import { scrapeWebsite } from '@/lib/scraper';
 
@@ -24,6 +24,7 @@ export class ProductChangeAgent extends BaseAgent {
         throw new Error('Competitor ID is required');
       }
 
+      const supabase = getSupabase();
       const { data: competitor } = await supabase
         .from('competitors')
         .select('*')
@@ -138,7 +139,7 @@ Analyze and return changes in this format:
   }
 
   private async getPreviousState(competitorId: string): Promise<any[]> {
-    const { data } = await supabase
+    const { data } = await getSupabase()
       .from('product_changes')
       .select('*')
       .eq('competitor_id', competitorId)

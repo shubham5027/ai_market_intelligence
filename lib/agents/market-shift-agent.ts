@@ -1,5 +1,5 @@
 import { BaseAgent, AgentExecutionContext, AgentResult } from './base-agent';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 import { callOpenRouter } from '@/lib/llm-client';
 import { tavilySearch } from '@/lib/tavily-agent';
 
@@ -67,6 +67,7 @@ Analyze and identify market shifts in this format:
 
       const shiftsData = JSON.parse(analysis);
 
+      const supabase = getSupabase();
       for (const shift of shiftsData.shifts) {
         await supabase.from('market_shifts').insert({
           shift_type: shift.type,
@@ -128,6 +129,7 @@ Analyze and identify market shifts in this format:
   }
 
   private async gatherMarketData(): Promise<any> {
+    const supabase = getSupabase();
     const [competitors, recentPricing, recentProducts, recentNews, externalTrends] = await Promise.all([
       supabase.from('competitors').select('*').eq('status', 'active'),
       supabase
@@ -165,11 +167,11 @@ Analyze and identify market shifts in this format:
         'enterprise technology shifts',
         'B2B software market outlook',
       ];
-      
+
       const results = await Promise.all(
         queries.map(q => tavilySearch(q, { maxResults: 3, includeAnswer: true }))
       );
-      
+
       return {
         marketTrends: results[0]?.answer || null,
         technologyShifts: results[1]?.answer || null,

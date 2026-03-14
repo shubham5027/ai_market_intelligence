@@ -1,5 +1,5 @@
 import { BaseAgent, AgentExecutionContext, AgentResult } from './base-agent';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 import { callOpenRouter } from '@/lib/llm-client';
 
 export class ExecutiveReportAgent extends BaseAgent {
@@ -101,6 +101,7 @@ Generate an executive intelligence report in this format:
 
       const reportData = JSON.parse(report);
 
+      const supabase = getSupabase();
       const { data: insertedReport } = await supabase
         .from('executive_reports')
         .insert({
@@ -169,6 +170,7 @@ Generate an executive intelligence report in this format:
     const daysBack = period === 'daily' ? 1 : period === 'weekly' ? 7 : 30;
     const startDate = new Date(Date.now() - daysBack * 24 * 60 * 60 * 1000).toISOString();
 
+    const db = getSupabase();
     const [
       competitors,
       prices,
@@ -179,38 +181,38 @@ Generate an executive intelligence report in this format:
       anomalies,
       alerts,
     ] = await Promise.all([
-      supabase.from('competitors').select('*').eq('status', 'active'),
-      supabase
+      db.from('competitors').select('*').eq('status', 'active'),
+      db
         .from('price_monitoring')
         .select('*')
         .gte('detected_at', startDate)
         .order('detected_at', { ascending: false }),
-      supabase
+      db
         .from('product_changes')
         .select('*')
         .gte('detected_at', startDate)
         .order('detected_at', { ascending: false }),
-      supabase
+      db
         .from('news_articles')
         .select('*')
         .gte('collected_at', startDate)
         .order('collected_at', { ascending: false }),
-      supabase
+      db
         .from('swot_analyses')
         .select('*')
         .gte('analyzed_at', startDate)
         .order('analyzed_at', { ascending: false }),
-      supabase
+      db
         .from('market_shifts')
         .select('*')
         .gte('detected_at', startDate)
         .order('detected_at', { ascending: false }),
-      supabase
+      db
         .from('anomaly_detections')
         .select('*')
         .gte('detected_at', startDate)
         .order('detected_at', { ascending: false }),
-      supabase
+      db
         .from('alerts')
         .select('*')
         .gte('created_at', startDate)
