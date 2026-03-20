@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { AnomalyDetectionAgent } from '@/lib/agents/anomaly-detection-agent';
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase';
 
@@ -26,8 +26,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from('anomaly_detections')
       .select(`
-        *,
-        competitors:affected_entity_id (id, name)
+        *
       `)
       .gte('detected_at', startDate)
       .order('detected_at', { ascending: false })
