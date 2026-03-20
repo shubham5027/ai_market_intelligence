@@ -8,7 +8,7 @@ export class NewsAggregationAgent extends BaseAgent {
     super({
       name: 'NewsAggregationAgent',
       description: 'Aggregates and analyzes competitor news and sentiment',
-      model: 'openai/gpt-4-turbo',
+      model: 'openai/gpt-4o-mini',
       temperature: 0.4,
     });
   }

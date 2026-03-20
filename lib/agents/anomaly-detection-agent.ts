@@ -7,7 +7,7 @@ export class AnomalyDetectionAgent extends BaseAgent {
     super({
       name: 'AnomalyDetectionAgent',
       description: 'Detects anomalies and unusual patterns in competitive data',
-      model: 'openai/gpt-4-turbo',
+      model: 'openai/gpt-4o-mini',
       temperature: 0.3,
     });
   }

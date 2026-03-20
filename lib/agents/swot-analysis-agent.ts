@@ -99,7 +99,7 @@ export class SWOTAnalysisAgent extends BaseAgent {
     super({
       name: 'SWOTAnalysisAgent',
       description: 'Performs comprehensive SWOT analysis on competitors using structured evidence-based methodology',
-      model: 'openai/gpt-4-turbo',
+      model: 'openai/gpt-4o-mini',
       temperature: 0.3, // Lower temperature for more consistent structured output
     });
   }

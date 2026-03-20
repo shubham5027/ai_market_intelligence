@@ -7,7 +7,7 @@ export class ExecutiveReportAgent extends BaseAgent {
     super({
       name: 'ExecutiveReportAgent',
       description: 'Generates comprehensive executive intelligence reports',
-      model: 'openai/gpt-4-turbo',
+      model: 'openai/gpt-4o-mini',
       temperature: 0.6,
     });
   }

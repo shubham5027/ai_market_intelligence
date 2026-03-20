@@ -8,7 +8,7 @@ export class MarketShiftAgent extends BaseAgent {
     super({
       name: 'MarketShiftAgent',
       description: 'Detects market shifts and emerging trends',
-      model: 'openai/gpt-4-turbo',
+      model: 'openai/gpt-4o-mini',
       temperature: 0.6,
     });
   }
