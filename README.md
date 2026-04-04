@@ -14,7 +14,7 @@
 
 ---
 
-<img src="docs/assets/dashboard-preview.png" alt="Dashboard Preview" width="800">
+<img src="https://github.com/shubham5027/ai_market_intelligence/blob/main/Screenshot%202026-04-05%20011733.png" alt="Dashboard Preview" width="800">
 
 *Real-time competitive intelligence dashboard with AI-powered insights*
 
